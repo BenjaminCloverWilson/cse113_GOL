@@ -24,7 +24,7 @@ unsigned char **init_matrix(int row, int col)
     int i, j;
 
     /* Matrix initialization */
-    unsigned char **matrix;
+    unsigned char **matrix = NULL;
 
     /* Mallocs the number of rows */
     matrix = malloc(row * sizeof(unsigned char *));
@@ -77,50 +77,96 @@ void print_matrix(unsigned char **matrix, int row, int col)
         for(j = 0; j < col; j++)
         {
             if(j < col - 1)
-                printf("%d\t", matrix[i][j]);
+                printf("%c\t", matrix[i][j]);
             else
-                printf("%d\n", matrix[i][j]);
+                printf("%c\n", matrix[i][j]);
         }
+    
+    printf("\n");
 }
 
 
 unsigned char **next_gen(unsigned char **matrix, int row, int col, char edge)
 {
-    /* Iterations */
-    int i, j, y, z;
-    /* Neihbor "Alive" counter */
-    int count = 0;
+    /* Iterations and neighbor status tracker */
+    int i, j, y, z, count;
+    
+    /* Initializes tmp matrix */
+    unsigned char **tmp = NULL;
+    unsigned char **tmp_mat = NULL;
 
     switch(edge)
     {
-    /* Hedge First */
+    /* Hedge Edge */
     case('h'):
-        /* Adds dead cell edges for logic of a tmp matrix */
-        unsigned char **tmp = init_matrix(row + 2, col + 2);
+
+        /* Mallocs space for tmp arrays */
+        tmp = init_matrix(row + 2, col + 2);
+        tmp_mat = init_matrix(row, col);
         
         /* Places current cell pattern into tmp with dead edges */
-        for(i = 1; i < row + 2; i++)
-            for(j = 1; j < col + 2; j++)
+        for(i = 1; i < row + 1; i++)
+        {
+            for(j = 1; j < col + 1; j++)
                 tmp[i][j] = matrix[i - 1][j - 1];
+        }
+
+        /* Places current cell pattern into tmp_mat */
+        for(i = 0; i < row; i++)
+        {
+            for(j = 0; j < col; j++)
+                tmp_mat[i][j] = matrix[i][j];
+        }
+
+        /* Used for debugging */
+        //print_matrix(tmp_mat, row, col);
         
         /* Iterates through rows and cols of tmp that contain current matrix gen */
-        for(i = 1; i < row + 2; i++)
-            for(j = 1; j < col + 2; j++)
+        for(i = 1; i < row + 1; i++)
+        {
+            for(j = 1; j < col + 1; j++)
             {
+                /* Resets neighbor count for each cell */
+                count = 0;
+
                 /* Iterates through adjacent neighbors and counts number alive */
                 for(y = i - 1; y < i + 2; y++)
+                {
                     for(z = j - 1; z < j + 2; z++)
                     {
-                        /* '1' means alive */
-                        if(tmp[y][z] == '1')
+                        /* Conditions increase live neighbor count */
+                        if(tmp[y][z] != '0')
                             count++;
+                        /* Removes current cell in question from count if alive */
+                        if(y == i && z == j && tmp[y][z] != '0')
+                            count--;
                     }
-            }
+                }
 
+                /* GOL rule 4 */
+                if(tmp[i][j] == '0' && count == 3)
+                    tmp_mat[i - 1][j - 1] = '1';
+                
+                /*GOL rule 1-3 */
+                else if(tmp[i][j] != '0' && (count < 2 || count > 3))
+                    tmp_mat[i - 1][j - 1] = '0';
+            }
+        }
+
+        /* Printed for testing of life patterns */
+        //print_matrix(tmp_mat, row, col);
+        //print_matrix(tmp, row + 2, col + 2);
+
+        /* Frees tmp matrix with hedge dead edges */
+        free_matrix(tmp, row + 2);
 
         break;
     }
 
+    return tmp_mat;
+
+    /* Frees tmp matrix */
+    free_matrix(tmp_mat, row);
 }
 
 
@@ -137,4 +183,6 @@ void free_matrix(unsigned char **matrix, int row)
         free(matrix[i]);
     
     free(matrix);
+
+    matrix = NULL;
 }
