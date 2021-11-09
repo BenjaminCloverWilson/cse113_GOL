@@ -20,7 +20,9 @@
 /* Matrix functions */
 unsigned char **init_matrix(int row, int col);
 void print_matrix(unsigned char **matrix, int row, int col);
-unsigned char **next_gen(unsigned char **matrix, int row, int col, char edge);
+unsigned char **next_gen_hedge(unsigned char **matrix, int row, int col);
+unsigned char **next_gen_torus(unsigned char **matrix, int row, int col);
+unsigned char **next_gen_klein(unsigned char **matrix, int row, int col);
 void free_matrix(unsigned char **matrix, int row);
 
 #endif
