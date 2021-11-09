@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
 			/* Render game of life current gen */
 			sdl_render_life(&sdl_info, gen_A);
 
-			/* Determine next generation of cells and store in gen_B using hedge */
-			gen_B = next_gen(gen_A, cell_w, cell_h, 'h');
+			/* Determine next generation of cells and store in gen_B using torus */
+			gen_B = next_gen_torus(gen_A, cell_w, cell_h);
 
 			/* Iterate gen number */
 			gen++;
@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
 			/* Render game of life current gen */
 			sdl_render_life(&sdl_info, gen_B);
 
-			/* Determine next generation of cells and store in gen_A using hedge */
-			gen_A = next_gen(gen_B, cell_w, cell_h, 'h');
+			/* Determine next generation of cells and store in gen_A using torus */
+			gen_A = next_gen_torus(gen_B, cell_w, cell_h);
 
 			/* Iterate gen number */
 			gen++;
