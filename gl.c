@@ -18,15 +18,13 @@
 
 int main(int argc, char *argv[])
 {
-	int width = 1280;
-	int height = 720;
+	int width = 640;
+	int height = 480;
 	int sprite_size = 2; /* either 2, 4, 8, or 16 */
 	/*
 	int m = -66;
 	int n = -10;
 	*/
-	int cell_w = width / sprite_size;
-	int cell_h = height / sprite_size;
         /* colors are RGB model valid values [0, 255] */
 	unsigned char red = 140;
 	unsigned char green = 145;
@@ -41,23 +39,54 @@ int main(int argc, char *argv[])
 	init_sdl_info(&sdl_info, width, height, sprite_size, red, green, blue);
 
 	/* your life initialization code here */
+	/* Matrix width and height */
+	int cell_w = width / sprite_size;
+	int cell_h = height / sprite_size;
 
 	/* Initialization of 2 generations of cells */
 	unsigned char **gen_A = init_matrix(cell_w, cell_h);
 	unsigned char **gen_B = init_matrix(cell_w, cell_h);
 	
+	/* Genertation counter */
+	int gen = 0;
+
 	/* Print matrix in terminal for seeing what they are */
-	/*
-	print_matrix(gen_A, cell_w, cell_h);
-	printf("\n");
-	print_matrix(gen_B, cell_w, cell_h);
-	*/
+	/**
+	 * print_matrix(gen_A, cell_w, cell_h);
+	 * printf("\n");
+	 * print_matrix(gen_B, cell_w, cell_h);
+	 */
 
     /* Main loop: loop forever. */
 	while (1)
 	{
 		/* your game of life code goes here  */
-		sdl_render_life(&sdl_info, gen_A);
+		/* Renders gen_A if current gen number is divisble by 2 */
+		if(gen % 2 == 0)
+		{
+			/* Render game of life current gen */
+			sdl_render_life(&sdl_info, gen_A);
+
+			/* Determine next generation of cells and store in gen_B using hedge */
+			gen_B = next_gen(gen_A, cell_w, cell_h, 'h');
+
+			/* Iterate gen number */
+			gen++;
+
+		/* Renders gen_B if current gen number is NOT divisible by 2 */
+		} else if(gen % 2 != 0)
+		{
+			/* Render game of life current gen */
+			sdl_render_life(&sdl_info, gen_B);
+
+			/* Determine next generation of cells and store in gen_A using hedge */
+			gen_A = next_gen(gen_B, cell_w, cell_h, 'h');
+
+			/* Iterate gen number */
+			gen++;
+		}
+
+
 		/* change the  modulus value to slow the rendering */
 		/*
 		if (SDL_GetTicks() % 1 == 0)
