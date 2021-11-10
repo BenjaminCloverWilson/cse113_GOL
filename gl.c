@@ -18,9 +18,9 @@
 
 int main(int argc, char *argv[])
 {
-	int width = 640;
-	int height = 480;
-	int sprite_size = 2; /* either 2, 4, 8, or 16 */
+	int width = 1280;
+	int height = 720;
+	int sprite_size = 16; /* either 2, 4, 8, or 16 */
 	/*
 	int m = -66;
 	int n = -10;
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
         /* colors are RGB model valid values [0, 255] */
 	unsigned char red = 140;
 	unsigned char green = 145;
-	unsigned char blue = 250;
+	unsigned char blue = 0;
         struct sdl_info_t sdl_info; /* this is needed to graphically display the game */
         
     /* set up SDL -- works with SDL2 */
@@ -46,9 +46,17 @@ int main(int argc, char *argv[])
 	/* Initialization of 2 generations of cells */
 	unsigned char **gen_A = init_matrix(cell_w, cell_h);
 	unsigned char **gen_B = init_matrix(cell_w, cell_h);
-	
+
 	/* Genertation counter */
 	int gen = 0;
+
+	/* Initial pattern reading from text files */
+	FILE *fp = fopen("./patterns/1beacon_106.lif", "r");
+
+
+	fclose(fp);
+
+
 
 	/* Print matrix in terminal for seeing what they are */
 	/**
@@ -68,7 +76,7 @@ int main(int argc, char *argv[])
 			sdl_render_life(&sdl_info, gen_A);
 
 			/* Determine next generation of cells and store in gen_B using torus */
-			gen_B = next_gen_torus(gen_A, cell_w, cell_h);
+			gen_B = next_gen_hedge(gen_A, cell_w, cell_h);
 
 			/* Iterate gen number */
 			gen++;
@@ -80,7 +88,7 @@ int main(int argc, char *argv[])
 			sdl_render_life(&sdl_info, gen_B);
 
 			/* Determine next generation of cells and store in gen_A using torus */
-			gen_A = next_gen_torus(gen_B, cell_w, cell_h);
+			gen_A = next_gen_hedge(gen_B, cell_w, cell_h);
 
 			/* Iterate gen number */
 			gen++;
@@ -89,7 +97,7 @@ int main(int argc, char *argv[])
 
 		/* change the  modulus value to slow the rendering */
 		/*
-		if (SDL_GetTicks() % 1 == 0)
+			if (SDL_GetTicks() % 1 == 0)
 			sdl_test(&sdl_info, m, n);
 		*/
 
