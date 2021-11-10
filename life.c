@@ -5,7 +5,7 @@
  * matrices, etc.
  * @author Benjamin Wilson
  * @date Fall 2021
- * @todo Idk even know what's happening here yet.
+ * @todo Idk even know what s happening here yet.
  * @bug none
  */
 
@@ -55,11 +55,11 @@ unsigned char **init_matrix(int row, int col)
         }
     }
 
-    /* If it does not fail, then each cell is equal to O (dead) */
+    /* If it does not fail, then each cell is equal to . (dead) */
     for(i = 0; i < row; i++)
     {
         for(j = 0; j < col; j++)
-            matrix[i][j] = 'O';
+            matrix[i][j] =  0 ;
     }
 
     return matrix;
@@ -88,7 +88,7 @@ void print_matrix(unsigned char **matrix, int row, int col)
 /**
  * Calculates next generation of cells using hedge edge
  * @param matrix The current generation of cells that is used to calculate
- * the next generation by Conway's Game of Life.
+ * the next generation by Conway s Game of Life.
  * @param row The number of rows in matrix
  * @param col The number of columns in matrix
  * @return The values/pattern of the next generation stored in tmp_mat.
@@ -138,21 +138,21 @@ unsigned char **next_gen_hedge(unsigned char **matrix, int row, int col)
                 for(z = j - 1; z < j + 2; z++)
                 {
                     /* Conditions increase live neighbor count */
-                    if(tmp[y][z] != 'O')
+                    if(tmp[y][z] !=  0 )
                         count++;
                     /* Removes current cell in question from count if alive */
-                    if(y == i && z == j && tmp[y][z] != 'O')
+                    if(y == i && z == j && tmp[y][z] !=  0 )
                         count--;
                 }
             }
 
             /* GOL rule 4 */
-            if(tmp[i][j] == 'O' && count == 3)
-                tmp_mat[i - 1][j - 1] = '#';
+            if(tmp[i][j] ==  0  && count == 3)
+                tmp_mat[i - 1][j - 1] =  1 ;
             
             /*GOL rule 1-3 */
-            else if(tmp[i][j] != 'O' && (count < 2 || count > 3))
-                tmp_mat[i - 1][j - 1] = 'O';
+            else if(tmp[i][j] !=  0  && (count < 2 || count > 3))
+                tmp_mat[i - 1][j - 1] =  0 ;
         }
     }
 
@@ -173,14 +173,14 @@ unsigned char **next_gen_hedge(unsigned char **matrix, int row, int col)
 /**
  * Calculates next generation of cells using torus edges
  * @param matrix The current generation of cells that is used to calculate
- * the next generation by Conway's Game of Life.
+ * the next generation by Conway s Game of Life.
  * @param row The number of rows in matrix
  * @param col The number of columns in matrix
  * @return The values/pattern of the next generation stored in tmp_mat.
  */
 unsigned char **next_gen_torus(unsigned char **matrix, int row, int col)
 {
-        /* Iterations and neighbor status tracker */
+    /* Iterations and neighbor status tracker */
     int i, j, y, z, count;
     
     /* Initializes tmp matrix */
@@ -243,21 +243,139 @@ unsigned char **next_gen_torus(unsigned char **matrix, int row, int col)
                 for(z = j - 1; z < j + 2; z++)
                 {
                     /* Conditions increase live neighbor count */
-                    if(tmp[y][z] != 'O')
+                    if(tmp[y][z] !=  0 )
                         count++;
                     /* Removes current cell in question from count if alive */
-                    if(y == i && z == j && tmp[y][z] != 'O')
+                    if(y == i && z == j && tmp[y][z] !=  0 )
                         count--;
                 }
             }
 
             /* GOL rule 4 */
-            if(tmp[i][j] == 'O' && count == 3)
-                tmp_mat[i - 1][j - 1] = '#';
+            if(tmp[i][j] ==  0  && count == 3)
+                tmp_mat[i - 1][j - 1] =  1 ;
             
             /*GOL rule 1-3 */
-            else if(tmp[i][j] != 'O' && (count < 2 || count > 3))
-                tmp_mat[i - 1][j - 1] = 'O';
+            else if(tmp[i][j] !=  0  && (count < 2 || count > 3))
+                tmp_mat[i - 1][j - 1] =  0 ;
+        }
+    }
+
+    /* Printed for testing of life patterns */
+    //print_matrix(tmp_mat, row, col);
+    //print_matrix(tmp, row + 2, col + 2);
+
+    /* Frees tmp matrix with hedge dead edges */
+    free_matrix(tmp, row + 2);
+
+
+    return tmp_mat;
+
+    /* Frees tmp matrix */
+    free_matrix(tmp_mat, row);
+}
+
+/** Calculates next generation based on klein bottle edge
+ * @param matrix The current generation of cells that is used to calculate
+ * the next generation by Conway s Game of Life.
+ * @param row The number of rows in matrix
+ * @param col The number of columns in matrix
+ * @return The values/pattern of the next generation stored in tmp_mat.
+ */
+unsigned char **next_gen_klein(unsigned char **matrix, int row, int col)
+{
+    /* Iterations and neighbor status tracker */
+    int i, j, y, z, count;
+    
+    /* Initializes tmp matrix */
+    unsigned char **tmp = NULL;
+    unsigned char **tmp_mat = NULL;
+
+
+    /* Mallocs space for tmp arrays */
+    tmp = init_matrix(row + 2, col + 2);
+    tmp_mat = init_matrix(row, col);
+    
+    /* Places current cell pattern into tmp with empty dead edges */
+    for(i = 1; i < row + 1; i++)
+    {
+        for(j = 1; j < col + 1; j++)
+            tmp[i][j] = matrix[i - 1][j - 1];
+    }
+
+    /* Places bottom of cell pattern into top of tmp */
+    i = 0;
+    for(j = 1; j < col + 1; j++)
+        tmp[i][j] = matrix[row - 1][j - 1];
+
+    /* Places top of cell pattern into bottom of tmp */
+    i = row + 1;
+    for(j = 1; j < col + 1; j++)
+        tmp[i][j] = matrix[0][j - 1];
+
+    /* Places lower right of cell pattern into top left column of tmp */
+    j = 0;
+    y = row - 1;
+    z = col - 1;
+    for(i = 1; i < (row + 1) / 2; i++)
+        tmp[i][j] = matrix[y--][z];
+    
+    /* Places upper right of cell pattern into top left column of tmp */
+    /* j, y, and z are currently at correct indexes of matrix array */
+    for(i = (row + 1) / 2; i < row + 1; i++)
+        tmp[i][j] = matrix[y--][z];
+    
+    /* Places lower left of cell pattern into top right column of tmp */
+    j = col + 1;
+    y = row - 1;
+    z = 0;
+    for(i = 1; i < (row + 1) / 2; i++)
+        tmp[i][j] = matrix[y--][z];
+    
+    /* Places upper left of cell pattern into top right column of tmp */
+    /* j, y, and z are currently at correct indexes of matrix array */
+    for(i = (row + 1) / 2; i < row + 1; i++)
+        tmp[i][j] = matrix[y--][z];
+
+    /* Places current cell pattern into tmp_mat */
+    for(i = 0; i < row; i++)
+    {
+        for(j = 0; j < col; j++)
+            tmp_mat[i][j] = matrix[i][j];
+    }
+
+    /* Used for debugging */
+    //print_matrix(tmp_mat, row, col);
+    
+    /* Iterates through rows and cols of tmp that contain current matrix gen */
+    for(i = 1; i < row + 1; i++)
+    {
+        for(j = 1; j < col + 1; j++)
+        {
+            /* Resets neighbor count for each cell */
+            count = 0;
+
+            /* Iterates through adjacent neighbors and counts number alive */
+            for(y = i - 1; y < i + 2; y++)
+            {
+                for(z = j - 1; z < j + 2; z++)
+                {
+                    /* Conditions increase live neighbor count */
+                    if(tmp[y][z] !=  0 )
+                        count++;
+                    /* Removes current cell in question from count if alive */
+                    if(y == i && z == j && tmp[y][z] !=  0 )
+                        count--;
+                }
+            }
+
+            /* GOL rule 4 */
+            if(tmp[i][j] ==  0  && count == 3)
+                tmp_mat[i - 1][j - 1] =  1 ;
+            
+            /*GOL rule 1-3 */
+            else if(tmp[i][j] !=  0  && (count < 2 || count > 3))
+                tmp_mat[i - 1][j - 1] =  0 ;
         }
     }
 
@@ -276,9 +394,50 @@ unsigned char **next_gen_torus(unsigned char **matrix, int row, int col)
 }
 
 
-unsigned char **next_gen_klein(unsigned char **matrix, int row, int col)
+unsigned char **pattern(FILE *fp, int row, int col)
 {
+    unsigned char **tmp = init_matrix(row, col);
 
+    char in[LEN];
+
+    /* Line Number being read */
+    int count = 0;
+
+    /* Cords for pattern input and iterations */
+    int i, x, y;
+
+    while(fgets(in, LEN, fp))
+    {
+        if(count != 0)
+        {
+            /* Assins x-cord to x */
+            x = atoi(in);
+            
+            /* Finds y cord */
+            while(in[i] != ' ')
+                i++;
+            
+            /* Makes i go to the initial char represented y-cord */
+            i++;
+
+            /* Assins y cord to y */
+            y = atoi(in[i]);
+
+            /* Places live cell into tmp based on x, y cords */
+            if(x >= 0 && y >= 0)
+                tmp[y][x] = 1;
+            
+            if(x >= 0 && y < 0)
+                tmp[row - y][x];
+        }
+
+        count++;
+    }
+
+
+    return tmp;
+
+    free_matrix(tmp, row);
 }
 
 
