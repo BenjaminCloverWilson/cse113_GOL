@@ -394,46 +394,73 @@ unsigned char **next_gen_klein(unsigned char **matrix, int row, int col)
 }
 
 
-unsigned char **pattern(FILE *fp, int row, int col)
+unsigned char **pattern(FILE *fp, int row, int col, int x_o, int y_o)
 {
     unsigned char **tmp = init_matrix(row, col);
 
     char in[LEN];
+    char cord[LEN];
 
     /* Line Number being read */
     int count = 0;
 
     /* Cords for pattern input and iterations */
-    int i, x, y;
+    int i, j, x, y;
 
     while(fgets(in, LEN, fp))
     {
+
         if(count != 0)
         {
             /* Assins x-cord to x */
-            x = atoi(in);
-            
-            /* Finds y cord */
-            while(in[i] != ' ')
-                i++;
-            
-            /* Makes i go to the initial char represented y-cord */
-            i++;
+            for(i = 0; in[i] != ' '; i++)
+                cord[i] = in[i];
+            /* Separates x cord for atoi and goes to y-cord */
+            cord[i++] = ' ';
+            x = atoi(cord);
 
-            /* Assins y cord to y */
-            y = atoi(in[i]);
+            /* Assigns y cord to y */
+            j = 0;
+            for(i = i; in[i] != '\n'; i++)
+                cord[j++] = in[i];
+            /* Separates new cord from old numbers of reused char array */
+            cord[j] = ' ';
+            y = atoi(cord);
+
+            x += x_o;
+            y += y_o;
+
+            /* Checks that cords can't go out of range */
+            if(x < (-1) * (col - 1))
+                x += (col - 1);
+            else if(x > col - 1)
+                x -= (col - 1);
+            
+            if(y < (-1) * (row - 1))
+                y += (row - 1);
+            else if(y > row - 1)
+                y -= (row - 1);            
 
             /* Places live cell into tmp based on x, y cords */
+            /* Prints for debugging */
+            //printf("%d, %d\n", x, y);
             if(x >= 0 && y >= 0)
                 tmp[y][x] = 1;
-            
-            if(x >= 0 && y < 0)
-                tmp[row - y][x];
+            else if(x >= 0 && y < 0)
+                tmp[row + y][x] = 1;
+            else if(x < 0 && y >= 0)
+                tmp[y][col + x] = 1;
+            else if(x < 0 && y < 0)
+                tmp[row + y][col + x] = 1;
         }
 
         count++;
     }
 
+    printf("Count: %d\n", count);
+
+    /* Used for debugging */
+    print_matrix(tmp, row, col);
 
     return tmp;
 
