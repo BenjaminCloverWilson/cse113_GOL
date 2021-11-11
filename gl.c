@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 {
 	int width = 1280;
 	int height = 720;
-	int sprite_size = 16; /* either 2, 4, 8, or 16 */
+	int sprite_size = 4; /* either 2, 4, 8, or 16 */
 	/*
 	int m = -66;
 	int n = -10;
@@ -51,12 +51,11 @@ int main(int argc, char *argv[])
 	int gen = 0;
 
 	/* Initial pattern reading from text files */
-	FILE *fp = fopen("./patterns/1beacon_106.lif", "r");
+	FILE *fp = fopen("./patterns/gunstar_106.lif", "r");
 
+	gen_A = pattern(fp, cell_w, cell_h, 45, 45);
 
 	fclose(fp);
-
-
 
 	/* Print matrix in terminal for seeing what they are */
 	/**
@@ -72,11 +71,12 @@ int main(int argc, char *argv[])
 		/* Renders gen_A if current gen number is divisble by 2 */
 		if(gen % 2 == 0)
 		{
+			
 			/* Render game of life current gen */
 			sdl_render_life(&sdl_info, gen_A);
 
 			/* Determine next generation of cells and store in gen_B using torus */
-			gen_B = next_gen_hedge(gen_A, cell_w, cell_h);
+			gen_B = next_gen_torus(gen_A, cell_w, cell_h);
 
 			/* Iterate gen number */
 			gen++;
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 			sdl_render_life(&sdl_info, gen_B);
 
 			/* Determine next generation of cells and store in gen_A using torus */
-			gen_A = next_gen_hedge(gen_B, cell_w, cell_h);
+			gen_A = next_gen_torus(gen_B, cell_w, cell_h);
 
 			/* Iterate gen number */
 			gen++;
