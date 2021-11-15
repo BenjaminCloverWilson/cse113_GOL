@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Cycles through command line options */
-	while((c = getopt(argc, argv, ":w:h:r:g:b:s:f:o:e:")) != -1)
+	while((c = getopt(argc, argv, ":w:h:r:g:b:s:f:o:e:H")) != -1)
 	{
 		switch(c) {
 		
@@ -239,15 +239,15 @@ int main(int argc, char *argv[])
 		
 		/* Help option for figuring out argument and command format */
 		case 'H':
-			printf("Usage: life [-w width -h height -r red -g green -b blue -s sprite] -f filename -o coordinates -e edge\n");
+			printf("Usage: life -w width -h height -r red -g green -b blue -s sprite -f filename -o coordinates -e edge\n");
 			printf("w: Screen Width of simulation in pixels. Must be larger than 0. Default of 1280p\n");
 			printf("h: Screen height of simlation in pixels. Must be larger than 0. Default of 720p\n");
 			printf("r: RGB value (0-255) of red coloring of cells. Default of 140\n");
 			printf("g: RGB value (0-255) of green coloring of cells. Default of 145\n");
 			printf("b: RGB value (0-255) of blue coloring of cells. Default of 0\n");
-			printf("s: Size if the sprite. Valid values are 2, 4, 8, or 16 only. Must be an integer. Default of 8p\n");
+			printf("s: Size of the sprite. Valid values are 2, 4, 8, or 16 only. Must be an integer. Default of 8p\n");
 			printf("f: Filename and path of initial life pattern in file format 1.06. Default glider_106.lif\n");
-			printf("o: Initial (x,y) cooradinates of the initial pattern on the screen in pixels without spaces. Default of 45,45\n");
+			printf("o: Initial (x,y) cooradinates of the initial pattern on the screen in pixels without spaces and with wrapping. Default of 45,45\n");
 			printf("e: Edge of life simulation. Valid options are \"hedge\", \"torus\", or \"klein\". Default of torus\n");
 			exit(EXIT_SUCCESS);
 			break;
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 		case '?':
 		default:
 			printf("Illegal option '-%c' ignored.\n", optopt);
-			printf("Usage: life [-w width -h height -r red -g green -b blue -s sprite] -f filename -o coordinates -e edge\n");
+			printf("Usage: life -w width -h height -r red -g green -b blue -s sprite -f filename -o coordinates -e edge\n");
 			break;
 		}
 	}
