@@ -173,55 +173,64 @@ int main(int argc, char *argv[])
 			/* Sets tmp int and first assigns x_o value */
 			argtmp = atoi(optarg);
 				x_o = argtmp;
-			
+
 			/* Finds y cord using comma and error checks */
 			for(i = 0; *(optarg + i) != '\0'; i++)
-				if(*(optarg + i) == ',' && *(optarg + i + 1) != '\0')
+			{
+				if(*(optarg + i) == ',')
 				{
-					if(*(optarg + i + 1) == ' ')
+					i++;
+					if(*(optarg + i) == '\0')
 					{
-						printf("%s: argument to option '-o' failed. Coordinate must contain no spaces (x,y).\n", argv[0]);
+						printf("%s: argument to option '-o' failed. Coordinate must contain no spaces and be in format (x,y).\n", argv[0]);
 						exit(EXIT_FAILURE);
 					}
 
 					/* Places y-cord into cord[] */
-					for(j = 0; *(optarg + i + 1) != '\0'; j++)
-						cord[j] = *(optarg + i + 1);
+					for(j = 0; *(optarg + i) != '\0'; j++)
+					{
+						cord[j] = *(optarg + i);
+						i++;
+					}
+					
+					cord[j] = '\0';
 					
 					/* Creates tmp int from cord and assigns y_o value */
 					argtmp = atoi(cord);
 						y_o = argtmp;
-					
+
 					/* Breaks out of for loop */
 					break;
-				/* Error checks for any spaces */
-				} else if(*(optarg + i) == ' ')
-				{
-					printf("%s: argument to option '-o' failed. Coordinate must contain no spaces (x,y).\n", argv[0]);
-					exit(EXIT_FAILURE);
 				}
+			}
 			
 			break;
 		
 		/* Edge behavior */
 		case 'e':
 			/* Assigns e to hedge behavior if argument matches */
-			cmp = strncmp(optarg, "hedge\0", 10);
+			cmp = strncmp(optarg, "hedge", 6);
 			if(cmp == 0)
 				edge = 'h';
-			
-			/* Assigns e to torus behavior if argument matches */
-			cmp = strncmp(optarg, "torus\0", 10);
-			if(cmp == 0)
-				edge = 't';
-			
-			/* Assigns e to klein behavior if argument matches */
-			cmp = strncmp(optarg, "klein\0", 10);
-			if(cmp == 0)
-				edge = 'k';
+			else
+			{
+				/* Assigns e to torus behavior if argument matches */
+				cmp = strncmp(optarg, "torus", 6);
+				if(cmp == 0)
+					edge = 't';
+				else
+				{
+					/* Assigns e to klein behavior if argument matches */
+					cmp = strncmp(optarg, "klein", 6);
+					if(cmp == 0)
+						edge = 'k';
+					else
+						edge = '0';
+				}
+			}
 			
 			/* Error checks */
-			if(edge != 'h' || edge != 't' || edge != 'k')
+			if(edge != 'h' && edge != 't' && edge != 'k')
 			{
 				printf("%s: argument to option '-e' failed. Edge must be hedge, torus, or klein.\n", argv[0]);
 				exit(EXIT_FAILURE);
