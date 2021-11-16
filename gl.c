@@ -273,6 +273,9 @@ int main(int argc, char *argv[])
 	unsigned char **gen_A = init_matrix(cell_w, cell_h);
 	unsigned char **gen_B = init_matrix(cell_w, cell_h);
 
+	/* Matrix pointer for frees */
+	unsigned char **track = gen_A;
+
 	/* Genertation counter */
 	int gen = 0;
 
@@ -285,6 +288,10 @@ int main(int argc, char *argv[])
 
 	/* Closes text file */
 	fclose(fp);
+
+	/* Frees memory allocated before pattern was called and sets new tracker */
+	free_matrix(track, cell_w);
+	track = gen_B;
 
 	/* Print matrix in terminal for seeing what they are for debugging */
 	/**
@@ -302,6 +309,7 @@ int main(int argc, char *argv[])
 		{
 			if (SDL_GetTicks() % 50 == 0)
 			{
+
 				/* Render game of life current gen */
 				sdl_render_life(&sdl_info, gen_A);
 
@@ -313,6 +321,10 @@ int main(int argc, char *argv[])
 				else if(edge == 'k')
 					gen_B = next_gen_klein(gen_A, cell_w, cell_h);
 
+				/* Frees old B allocation and tracks A */
+				free_matrix(track, cell_w);
+				track = gen_A;
+
 				/* Iterate gen number */
 				gen++;
 			}
@@ -322,8 +334,9 @@ int main(int argc, char *argv[])
 		{
 			if (SDL_GetTicks() % 50 == 0)
 			{
+
 				/* Render game of life current gen */
-				//sdl_render_life(&sdl_info, gen_B);
+				sdl_render_life(&sdl_info, gen_B);
 
 				/* Determine next generation of cells and store in gen_A using correct edge behavior */
 				if(edge == 'h')
@@ -332,6 +345,10 @@ int main(int argc, char *argv[])
 					gen_A = next_gen_torus(gen_B, cell_w, cell_h);
 				else if(edge == 'k')
 					gen_A = next_gen_klein(gen_B, cell_w, cell_h);
+
+				/* Frees old A allocation and tracks B */
+				free_matrix(track, cell_w);
+				track = gen_B;
 
 				/* Iterate gen number */
 				gen++;
