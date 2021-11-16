@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
 	{
 		/* Prints out usage */
 		printf("Usage: life -w width -h height -r red -g green -b blue -s size -f filename -o coordinates -e edge\n");
-		exit(EXIT_FAILURE);
 	}
 
 	/* Cycles through command line options */
@@ -75,7 +74,6 @@ int main(int argc, char *argv[])
 			else
 			{
 				printf("%s: argument to option -w failed. Window width must be larger than 0.\n", argv[0]);
-				exit(EXIT_FAILURE);
 			}
 			break;
 		
@@ -90,7 +88,6 @@ int main(int argc, char *argv[])
 			else
 			{
 				printf("%s: argument to option -h has failed. Window height must be larger than 0.\n", argv[0]);
-				exit(EXIT_FAILURE);
 			}
 			break;
 		
@@ -105,7 +102,6 @@ int main(int argc, char *argv[])
 			else
 			{
 				printf("%s: argument to option -r has failed. Argument must follow rgb standards (0-255).\n", argv[0]);
-				exit(EXIT_FAILURE);
 			}
 			break;
 		
@@ -120,7 +116,6 @@ int main(int argc, char *argv[])
 			else
 			{
 				printf("%s: argument to option -g has failed. Argument must follow rgb standards (0-255).\n", argv[0]);
-				exit(EXIT_FAILURE);
 			}
 			break;
 		
@@ -135,7 +130,6 @@ int main(int argc, char *argv[])
 			else
 			{
 				printf("%s: argument to option -b has failed. Argument must follow rgb standards (0-255).\n", argv[0]);
-				exit(EXIT_FAILURE);
 			}
 			break;
 		
@@ -151,7 +145,6 @@ int main(int argc, char *argv[])
 			} else 
 			{
 				printf("%s: argument to option -s has failed. Sprite size must be 2, 4, 8, or 16.\n", argv[0]);
-				exit(EXIT_FAILURE);
 			}
 			break;
 		
@@ -164,7 +157,6 @@ int main(int argc, char *argv[])
 			if(fp == NULL)
 			{
 				printf("%s: argument to option '-f' failed. Filename must contain file 1.06 format.\n", argv[0]);
-				exit(EXIT_FAILURE);
 			}
 			break;
 		
@@ -183,7 +175,7 @@ int main(int argc, char *argv[])
 					if(*(optarg + i) == '\0')
 					{
 						printf("%s: argument to option '-o' failed. Coordinate must contain no spaces and be in format (x,y).\n", argv[0]);
-						exit(EXIT_FAILURE);
+						break;
 					}
 
 					/* Places y-cord into cord[] */
@@ -233,7 +225,6 @@ int main(int argc, char *argv[])
 			if(edge != 'h' && edge != 't' && edge != 'k')
 			{
 				printf("%s: argument to option '-e' failed. Edge must be hedge, torus, or klein.\n", argv[0]);
-				exit(EXIT_FAILURE);
 			}
 			break;
 		
@@ -246,16 +237,20 @@ int main(int argc, char *argv[])
 			printf("g: RGB value (0-255) of green coloring of cells. Default of 145\n");
 			printf("b: RGB value (0-255) of blue coloring of cells. Default of 0\n");
 			printf("s: Size of the sprite. Valid values are 2, 4, 8, or 16 only. Must be an integer. Default of 8p\n");
-			printf("f: Filename and path of initial life pattern in file format 1.06. Default glider_106.lif\n");
+			printf("f: Filename and path of initial life pattern in file format 1.06. Default ./patterns/glider_106.lif\n");
 			printf("o: Initial (x,y) cooradinates of the initial pattern on the screen in pixels without spaces and with wrapping. Default of 45,45\n");
 			printf("e: Edge of life simulation. Valid options are \"hedge\", \"torus\", or \"klein\". Default of torus\n");
+			printf("NOTE: Invalid arguments are noted in the terminal and the program is run with the default value instead\n");
+			printf("NOTE 2: Default of filename is based on provided path to created patterns folder, ./patterns/filename.\n");
+			printf("The filename must be provided via a relative file path if the .lif file is not in the same directory as gl.c\n");
+			printf("Note 3: Leaving an argument blank, then attempting a second argument results in a default value\n");
 			exit(EXIT_SUCCESS);
 			break;
 		
 		/* No argument passed */
 		case ':':
 			printf("%s: option '-%c' requires an argument.\n", argv[0], optopt);
-			exit(EXIT_FAILURE);
+			break;
 		
 		/* Default case */
 		case '?':
@@ -328,7 +323,7 @@ int main(int argc, char *argv[])
 			if (SDL_GetTicks() % 50 == 0)
 			{
 				/* Render game of life current gen */
-				sdl_render_life(&sdl_info, gen_B);
+				//sdl_render_life(&sdl_info, gen_B);
 
 				/* Determine next generation of cells and store in gen_A using correct edge behavior */
 				if(edge == 'h')
