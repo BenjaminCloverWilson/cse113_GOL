@@ -36,11 +36,17 @@ int main(int argc, char *argv[])
 	
 	/* Command line arguments and additional values needed for life.c functions */
 	int c; /* Used for command line arguments */
-	FILE *fp = NULL; /* file pattern */
-	int x_o = 45; /* Initial x-cord of pattern */
-	int y_o = 45; /* Initial y-cord of pattern */
+	FILE *fp_106 = NULL; /* file pattern */
+	FILE *fp_105 = NULL; /* file pattern for 105.lif */
+	int x_o_106 = 45; /* Initial x-cord of pattern */
+	int y_o_106 = 45; /* Initial y-cord of pattern */
+	int x_o_105 = 0; /* Initial x-cord of pattern for 105.lif */
+	int y_o_105 = 0; /* Initial y-cord of pattern for 105.lif */
 	char edge = 't'; /* Edge behavior of simulation */
 	int cmp; /* Used for command line arguments/comparisons */
+	char *find = NULL;
+	int call_106 = 0;
+	int call_105 = 0;
 	char cord[LEN]; /* Used for holding temp cord values in command line arguments */
 	int argtmp = -1; /* Integer storage of optarg */
 		int i, j; /* Iteration variable */
@@ -55,11 +61,11 @@ int main(int argc, char *argv[])
 	if(argc == 1) 
 	{
 		/* Prints out usage */
-		printf("Usage: life -w width -h height -r red -g green -b blue -s size -f filename -o coordinates -e edge\n");
+		printf("Usage: life -w width -h height -r red -g green -b blue -s size -f filename_106 -o coordinates_106 -Q filename_105 -q filename_105 -e edge\n");
 	}
 
 	/* Cycles through command line options */
-	while((c = getopt(argc, argv, ":w:h:r:g:b:s:f:o:e:H")) != -1)
+	while((c = getopt(argc, argv, ":w:h:r:g:b:s:f:o:Q:q:e:H")) != -1)
 	{
 		switch(c) {
 		
@@ -150,21 +156,26 @@ int main(int argc, char *argv[])
 		
 		/* Filename or path */
 		case 'f':
-			/* Opens the 1.06 life file */
-			fp = fopen(optarg, "r");
+			/* Tests for correct file format */
+			call_106 = 1;
 
-			/* Exits if improper file format */
-			if(fp == NULL)
-			{
-				printf("%s: argument to option '-f' failed. Filename must contain file 1.06 format.\n", argv[0]);
-			}
+			find = strstr(optarg, "105");
+
+			/* Opens the 1.06 life file */
+			if(find == NULL && fp_105 == NULL)
+				fp_106 = fopen(optarg, "r");
+
+			/* Defaults if improper file format */
+			if(fp_106 == NULL)
+				printf("%s: argument to option '-f' failed. Filename must contain file 1.06 format and no argument to '-Q' can be made\n", argv[0]);
+
 			break;
-		
-		/* Initial x,y coordinates of initial pattern */
+
+		/* Initial x,y coordinates of 1.06 initial pattern */
 		case 'o':
-			/* Sets tmp int and first assigns x_o value */
+			/* Sets tmp int and first assigns x_o_106 value */
 			argtmp = atoi(optarg);
-				x_o = argtmp;
+				x_o_106 = argtmp;
 
 			/* Finds y cord using comma and error checks */
 			for(i = 0; *(optarg + i) != '\0'; i++)
@@ -187,17 +198,72 @@ int main(int argc, char *argv[])
 					
 					cord[j] = '\0';
 					
-					/* Creates tmp int from cord and assigns y_o value */
+					/* Creates tmp int from cord and assigns y_o_106 value */
 					argtmp = atoi(cord);
-						y_o = argtmp;
+						y_o_106 = argtmp;
+
+					/* Breaks out of for loop */
+					break;
+				}
+			}	
+			break;
+		
+		/* Filename or path of a 1.05 file */
+		case 'Q':
+			/* Checks that 1.06 was not called or if -f failed while -Q was also called */
+			if(call_106 != 1 || fp_106 == NULL)
+				call_105 = 1;
+
+			/* Tests for correct file format */
+			find = strstr(optarg, "106");
+
+			/* Opens the 1.05 life file if correct file format*/
+			if(find == NULL && fp_106 == NULL)
+				fp_105 = fopen(optarg, "r");
+
+			/* Defaults if improper file format */
+			if(fp_105 == NULL)
+				printf("%s: argument to option '-Q' failed. Filename must contain file 1.05 format and '-f' must not be argued.\n", argv[0]);
+
+			break;
+		
+		/* Initial x,y coordinates of 1.05 initial pattern */
+		case 'q':
+			/* Sets tmp int and first assigns x_o_105 value */
+			argtmp = atoi(optarg);
+				x_o_105 = argtmp;
+
+			/* Finds y cord using comma and error checks */
+			for(i = 0; *(optarg + i) != '\0'; i++)
+			{
+				if(*(optarg + i) == ',')
+				{
+					i++;
+					if(*(optarg + i) == '\0')
+					{
+						printf("%s: argument to option '-q' failed. Coordinate must contain no spaces and be in format (x,y).\n", argv[0]);
+						break;
+					}
+
+					/* Places y-cord into cord[] */
+					for(j = 0; *(optarg + i) != '\0'; j++)
+					{
+						cord[j] = *(optarg + i);
+						i++;
+					}
+					
+					cord[j] = '\0';
+					
+					/* Creates tmp int from cord and assigns y_o_106 value */
+					argtmp = atoi(cord);
+						y_o_105 = argtmp;
 
 					/* Breaks out of for loop */
 					break;
 				}
 			}
-			
 			break;
-		
+
 		/* Edge behavior */
 		case 'e':
 			/* Assigns e to hedge behavior if argument matches */
@@ -238,12 +304,15 @@ int main(int argc, char *argv[])
 			printf("b: RGB value (0-255) of blue coloring of cells. Default of 0\n");
 			printf("s: Size of the sprite. Valid values are 2, 4, 8, or 16 only. Must be an integer. Default of 8p\n");
 			printf("f: Filename and path of initial life pattern in file format 1.06. Default ./patterns/glider_106.lif\n");
-			printf("o: Initial (x,y) cooradinates of the initial pattern on the screen in pixels without spaces and with wrapping. Default of 45,45\n");
+			printf("o: Initial (x,y) cooradinates of the initial pattern for 1.06 files on the screen in pixels without spaces and with wrapping. Default of 45,45 with respect to the top left of the window\n");
+			printf("Q: Filename and path of initial life pattern in file format 1.05. Default ./patterns/glider_105.lif\n");
+			printf("q: Initial (x,y) cooradinates of the initial pattern for 1.05 files on the screen in pixels without spaces and with wrapping. Default of 0,0 with respect to the center of the window\n");
 			printf("e: Edge of life simulation. Valid options are \"hedge\", \"torus\", or \"klein\". Default of torus\n");
 			printf("NOTE: Invalid arguments are noted in the terminal and the program is run with the default value instead\n");
 			printf("NOTE 2: Default of filename is based on provided path to created patterns folder, ./patterns/filename.\n");
 			printf("The filename must be provided via a relative file path if the .lif file is not in the same directory as gl.c\n");
 			printf("Note 3: Leaving an argument blank, then attempting a second argument results in a default value\n");
+			printf("Note 4: If both '-f' and '-Q' are argued, -f will be prioritized. '-Q' will only be run if '-f' is not called or if '-f' fails and '-Q' was argued as well\n");
 			exit(EXIT_SUCCESS);
 			break;
 		
@@ -256,7 +325,7 @@ int main(int argc, char *argv[])
 		case '?':
 		default:
 			printf("Illegal option '-%c' ignored.\n", optopt);
-			printf("Usage: life -w width -h height -r red -g green -b blue -s sprite -f filename -o coordinates -e edge\n");
+			printf("Usage: life -w width -h height -r red -g green -b blue -s size -f filename_106 -o coordinates_106 -Q filename_105 -q filename_105 -e edge\n");
 			break;
 		}
 	}
@@ -279,15 +348,47 @@ int main(int argc, char *argv[])
 	/* Genertation counter */
 	int gen = 0;
 
-	/* Default file pattern in case no command is passed */
-	if(fp == NULL)
-		fp = fopen("./patterns/glider_106.lif", "r");
+	/* Default file pattern in case no command is passed or 106 fails after being argued */
+	if((fp_106 == NULL && fp_105 == NULL && find == NULL && call_105 == 0 && call_106 == 0) || (call_106 == 1 && fp_106 == NULL))
+	{
+		fp_106 = fopen("./patterns/glider_106.lif", "r");
+		
+		/* Initial pattern reading from text files */
+		gen_A = pattern_106(fp_106, cell_w, cell_h, x_o_106, y_o_106);
+		
+		/* Closes text file */
+		fclose(fp_106);
+	
+	/* Opens file pattern argued if -f is called in command line */
+	} else if(call_106 == 1 && fp_106 != NULL)
+	{
+		/* Initial pattern reading from text files */
+		gen_A = pattern_106(fp_106, cell_w, cell_h, x_o_106, y_o_106);
+		
+		/* Closes text file */
+		fclose(fp_106);
+	
+	/* Default file pattern in case -Q command is passed but fails for some reason */
+	} else if(fp_105 == NULL && call_105 == 1)
+	{
+		fp_105 = fopen("./patterns/glider_105.lif", "r");
 
-	/* Initial pattern reading from text files */
-	gen_A = pattern(fp, cell_w, cell_h, x_o, y_o);
+		/* Initial pattern reading from text files */
+		gen_A = pattern_105(fp_105, cell_w, cell_h, x_o_105, y_o_105);
+		
+		/* Closes text file */
+		fclose(fp_105);
+	
+	/* Opens file pattern argued if -Q is called in command line */
+	} else if(call_105 == 1 && fp_105 != NULL)
+	{
+		/* Initial pattern reading from text files */
+		gen_A = pattern_105(fp_105, cell_w, cell_h, x_o_105, y_o_105);
+		
+		/* Closes text file */
+		fclose(fp_105);
+	}
 
-	/* Closes text file */
-	fclose(fp);
 
 	/* Frees memory allocated before pattern was called and sets new tracker */
 	free_matrix(track, cell_w);
