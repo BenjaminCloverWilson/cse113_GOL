@@ -173,7 +173,6 @@ unsigned char **next_gen_hedge(unsigned char **matrix, int row, int col)
     /* Frees tmp matrix with hedge dead edges */
     free_matrix(tmp, row + 2);
 
-
     return tmp_mat;
 
     /* Frees tmp matrix */
@@ -411,7 +410,7 @@ unsigned char **next_gen_klein(unsigned char **matrix, int row, int col)
  * @param y_o The initial y-cord of the pattern in the window of cells rendered
  * @return The values/pattern of the generation stored in tmp.
  */
-unsigned char **pattern(FILE *fp, int row, int col, int x_o, int y_o)
+unsigned char **pattern_106(FILE *fp, int row, int col, int x_o, int y_o)
 {
     unsigned char **tmp = init_matrix(row, col);
 
@@ -429,7 +428,7 @@ unsigned char **pattern(FILE *fp, int row, int col, int x_o, int y_o)
 
         if(count != 0)
         {
-            /* Assins x-cord to x */
+            /* Assigns x-cord to x */
             for(i = 0; in[i] != ' '; i++)
                 cord[i] = in[i];
             /* Separates x cord for atoi and goes to y-cord */
@@ -489,6 +488,120 @@ unsigned char **pattern(FILE *fp, int row, int col, int x_o, int y_o)
 
     /* Used for debugging */
     //print_matrix(tmp, row, col);
+
+    return tmp;
+
+    free_matrix(tmp, row);
+}
+
+
+unsigned char **pattern_105(FILE *fp, int row, int col, int x_o, int y_o)
+{
+    /* tmp array to store initial pattern */
+    unsigned char **tmp = init_matrix(row, col);
+
+    /* file line read array and cord storage array */
+    char in[LEN];
+    char cord[LEN];
+
+    /* cords and iteration variables */
+    int x, y, z, i, j;
+
+    /* Condition to start reading initial pattern & line counter */
+    int read = 0;
+    int count = 0;
+
+    /* Line reading of file */
+    while(fgets(in, LEN, fp))
+    {
+        /* Initial cords when P identiffier is read from file */
+        if(in[1] == 'P')
+        {
+            /* Finds initial x cord */
+            j = 0;
+            for(i = 3; in[i] != ' '; i++)
+                cord[j++] = in[i];
+            
+            /* Separate x-cord from old cord reads */
+            cord[j] = ' ';
+            
+            /* Sets integer value */
+            z = atoi(cord);
+            printf("x: %d\n", z);
+
+            /* Sets initial cord in middle of window and as specified by file */
+            x_o += (col / 2) + z;
+
+            j = 0;
+            for(i++; in[i] != '\n'; i++)
+                cord[j++] = in[i];
+            
+            cord[j] = ' ';
+
+            z = atoi(cord);
+            printf("y: %d\n", z);
+
+            y_o += (row / 2) + z;
+
+            read = 1;
+        }
+
+        /* Places live cells in correct spot */
+        if(read == 1 && in[1] != 'P')
+        {
+            /* Sets initial cords */
+            x += x_o;
+            y += y_o + count;
+
+            /* Checks that cords can't go out of range */
+            while(x < (-1) * (col - 1))
+                x += (col - 1);
+            while(x > col - 1)
+                x -= (col - 1);
+            
+            while(y < (-1) * (row - 1))
+                y += (row - 1);
+            while(y > row - 1)
+                y -= (row - 1);
+
+            /* For some reason x and y are swapped, and I'm too tired and lazy
+            * to fix it, so I'm doing a band-aid here and confusing you by
+            * swapping x and y to be appropriate values, instead of changing
+            * the indexing for tmp[][];
+            */
+            z = x;
+            x = y;
+            y = z;
+
+            for(i = 0; in[i] != '\n'; i++)
+            {
+                /* Places live cell into tmp based on x, y cords */
+                if(x >= 0 && y >= 0)
+                    if(in[i] = '.')
+                        tmp[y][x++] = 0;
+                    else if(in[i] = '*')
+                        tmp[y][x++] = 1;
+                else if(x >= 0 && y < 0)
+                    if(in[i] = '.')
+                        tmp[y][x++] = 0;
+                    else if(in[i] = '*')
+                        tmp[y][x++] = 1;
+                else if(x < 0 && y >= 0)
+                    if(in[i] = '.')
+                        tmp[y][x++] = 0;
+                    else if(in[i] = '*')
+                        tmp[y][x++] = 1;
+                else if(x < 0 && y < 0)
+                    if(in[i] = '.')
+                        tmp[y][x++] = 0;
+                    else if(in[i] = '*')
+                        tmp[y][x++] = 1;
+            }
+
+            /* Counts line in block of cells */
+            count++;
+        }
+    }
 
     return tmp;
 
