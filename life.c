@@ -494,7 +494,14 @@ unsigned char **pattern_106(FILE *fp, int row, int col, int x_o, int y_o)
     free_matrix(tmp, row);
 }
 
-
+/** Reads in 1.05.lif text files for input of pattern on a generation of cells
+ * @param fp The pointer to the file to be read
+ * @param row The number of rows in matrix
+ * @param col The number of columns in matrix
+ * @param x_o The initial x-cord of the pattern in the window of cells rendered
+ * @param y_o The initial y-cord of the pattern in the window of cells rendered
+ * @return The values/pattern of the generation stored in tmp.
+ */
 unsigned char **pattern_105(FILE *fp, int row, int col, int x_o, int y_o)
 {
     /* tmp array to store initial pattern */
@@ -527,22 +534,34 @@ unsigned char **pattern_105(FILE *fp, int row, int col, int x_o, int y_o)
             
             /* Sets integer value */
             z = atoi(cord);
-            printf("x: %d\n", z);
 
             /* Sets initial cord in middle of window and as specified by file */
             x_o += (col / 2) + z;
 
+            /* Finds initial y-cord */
             j = 0;
             for(i++; in[i] != '\n'; i++)
                 cord[j++] = in[i];
             
+            /* Separate y-cord from old cord reads */
             cord[j] = ' ';
 
+            /* Sets integer value */
             z = atoi(cord);
-            printf("y: %d\n", z);
 
+            /* Sets initial cord in middle of window and as specified by file */
             y_o += (row / 2) + z;
 
+            /* For some reason x and y are swapped, and I'm too tired and lazy
+            * to fix it, so I'm doing a band-aid here and confusing you by
+            * swapping x and y to be appropriate values, instead of changing
+            * the indexing for tmp[][];
+            */
+            z = x_o;
+            x_o = y_o;
+            y_o = z;
+
+            /* Allows for reading of block */
             read = 1;
         }
 
@@ -550,8 +569,8 @@ unsigned char **pattern_105(FILE *fp, int row, int col, int x_o, int y_o)
         if(read == 1 && in[1] != 'P')
         {
             /* Sets initial cords */
-            x += x_o;
-            y += y_o + count;
+            x = x_o;
+            y = y_o + count;
 
             /* Checks that cords can't go out of range */
             while(x < (-1) * (col - 1))
@@ -564,47 +583,46 @@ unsigned char **pattern_105(FILE *fp, int row, int col, int x_o, int y_o)
             while(y > row - 1)
                 y -= (row - 1);
 
-            /* For some reason x and y are swapped, and I'm too tired and lazy
-            * to fix it, so I'm doing a band-aid here and confusing you by
-            * swapping x and y to be appropriate values, instead of changing
-            * the indexing for tmp[][];
-            */
-            z = x;
-            x = y;
-            y = z;
-
+            /* Places alive cells in block from file into tmp matrix */
             for(i = 0; in[i] != '\n'; i++)
             {
-                /* Places live cell into tmp based on x, y cords */
+                /* Places live cell into tmp based on x, y cords and blocks from file */
                 if(x >= 0 && y >= 0)
-                    if(in[i] = '.')
+                {
+                    if(in[i] == '.')
                         tmp[y][x++] = 0;
-                    else if(in[i] = '*')
+                    else if(in[i] == '*')
                         tmp[y][x++] = 1;
-                else if(x >= 0 && y < 0)
-                    if(in[i] = '.')
+                } else if(x >= 0 && y < 0)
+                {
+                    if(in[i] == '.')
                         tmp[y][x++] = 0;
-                    else if(in[i] = '*')
+                    else if(in[i] == '*')
                         tmp[y][x++] = 1;
-                else if(x < 0 && y >= 0)
-                    if(in[i] = '.')
+                } else if(x < 0 && y >= 0)
+                {
+                    if(in[i] == '.')
                         tmp[y][x++] = 0;
-                    else if(in[i] = '*')
+                    else if(in[i] == '*')
                         tmp[y][x++] = 1;
-                else if(x < 0 && y < 0)
-                    if(in[i] = '.')
+                } else if(x < 0 && y < 0)
+                {
+                    if(in[i] == '.')
                         tmp[y][x++] = 0;
-                    else if(in[i] = '*')
+                    else if(in[i] == '*')
                         tmp[y][x++] = 1;
+                }
             }
 
-            /* Counts line in block of cells */
+            /* Block line counter iterated */
             count++;
         }
     }
 
+    /* Return matrix pattern */
     return tmp;
 
+    /* Free heap */
     free_matrix(tmp, row);
 }
 
