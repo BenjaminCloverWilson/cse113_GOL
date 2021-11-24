@@ -5,8 +5,9 @@
  * matrices, etc.
  * @author Benjamin Wilson
  * @date Fall 2021
- * @todo Idk even know what s happening here yet.
- * @bug none
+ * @todo Extra Credit for multiple initial patterns
+ * @bug oh, I wouldn't doubt it, but it seems fine to me. A little wierd at corners
+ * @remarks Works for both 1.06 and 1.05 file format for extra credit.
  */
 
 #include "life.h"
@@ -311,40 +312,33 @@ unsigned char **next_gen_klein(unsigned char **matrix, int row, int col)
             tmp[i][j] = matrix[i - 1][j - 1];
     }
 
-    /* Places bottom of cell pattern into top of tmp */
-    i = 0;
-    for(j = 1; j < col + 1; j++)
-        tmp[i][j] = matrix[row - 1][j - 1];
+    /* Places right bottom of cell pattern into top left of tmp */
+    i = col - 1;
+    for(j = 1; j < (col + 1) / 2; j++)
+        tmp[0][j] = matrix[row - 1][i--];
 
-    /* Places left of cell pattern into right of tmp */
-    i = row + 1;
-    for(j = 1; j < col + 1; j++)
-        tmp[i][j] = matrix[0][j - 1];
+    /* Places left bottom of cell pattern into top right of tmp */
+    for(j = j; j < col + 1; j++)
+        tmp[0][j] = matrix[row - 1][i--];
 
-    /* Places lower right of cell pattern into top left column of tmp */
+    /* Places right top of cell pattern into left bottom of tmp */
+    i = col - 1;
+    for(j = 1; j < (col + 1) / 2; j++)
+        tmp[row + 1][j] = matrix[0][i--];
+    
+    /* Places left top of cell pattern into right bottom of tmp */
+    for(j = j; j < col + 1; j++)
+        tmp[row + 1][j] = matrix[0][i--];
+
+    /* Places right column of cell pattern into left column of tmp */
     j = 0;
-    y = row - 1;
-    z = col - 1;
-    for(i = 1; i < (row + 1) / 2; i++)
-        tmp[i][j] = matrix[y--][z];
+    for(i = 1; i < row + 1; i++)
+        tmp[i][j] = matrix[i - 1][col - 1];
     
-    
-    /* Places upper right of cell pattern into top left column of tmp */
-    /* j, y, and z are currently at correct indexes of matrix array */
-    for(i = (row + 1) / 2; i < row + 1; i++)
-        tmp[i][j] = matrix[y--][z];
-    
-    /* Places lower left of cell pattern into top right column of tmp */
+    /* Places left column of cell pattern into right column of tmp */
     j = col + 1;
-    y = row - 1;
-    z = 0;
-    for(i = 1; i < (row + 1) / 2; i++)
-        tmp[i][j] = matrix[y--][z];
-    
-    /* Places upper left of cell pattern into top right column of tmp */
-    /* j, y, and z are currently at correct indexes of matrix array */
-    for(i = (row + 1) / 2; i < row + 1; i++)
-        tmp[i][j] = matrix[y--][z];
+    for(i = 1; i < row + 1; i++)
+        tmp[i][j] = matrix[i - 1][0];
 
     /* Places current cell pattern into tmp_mat */
     for(i = 0; i < row; i++)
@@ -458,7 +452,8 @@ unsigned char **pattern_106(FILE *fp, int row, int col, int x_o, int y_o)
             while(y > row - 1)
                 y -= (row - 1);            
 
-            /* For some reason x and y are swapped, and I'm too tired and lazy
+            /**
+             * For some reason x and y are swapped, and I'm too tired and lazy
              * to fix it, so I'm doing a band-aid here and confusing you by
              * swapping x and y to be appropriate values, instead of changing
              * the indexing for tmp[][];
@@ -536,7 +531,7 @@ unsigned char **pattern_105(FILE *fp, int row, int col, int x_o, int y_o)
             z = atoi(cord);
 
             /* Sets initial cord in middle of window and as specified by file */
-            x_o += (col / 2) + z;
+            x_o += (row / 2) + z;
 
             /* Finds initial y-cord */
             j = 0;
@@ -550,13 +545,14 @@ unsigned char **pattern_105(FILE *fp, int row, int col, int x_o, int y_o)
             z = atoi(cord);
 
             /* Sets initial cord in middle of window and as specified by file */
-            y_o += (row / 2) + z;
+            y_o += (col / 2) + z;
 
-            /* For some reason x and y are swapped, and I'm too tired and lazy
-            * to fix it, so I'm doing a band-aid here and confusing you by
-            * swapping x and y to be appropriate values, instead of changing
-            * the indexing for tmp[][];
-            */
+            /**
+             * For some reason x and y are swapped, and I'm too tired and lazy
+             * to fix it, so I'm doing a band-aid here and confusing you by
+             * swapping x and y to be appropriate values, instead of changing
+             * the indexing for tmp[][];
+             */
             z = x_o;
             x_o = y_o;
             y_o = z;
@@ -634,11 +630,14 @@ unsigned char **pattern_105(FILE *fp, int row, int col, int x_o, int y_o)
  */
 void free_matrix(unsigned char **matrix, int row)
 {
+    /* Iteration variable */
     int i;
     
+    /* Frees colulmns */
     for(i = 0; i < row; i++)
         free(matrix[i]);
     
+    /* Frees rows */
     free(matrix);
 
     matrix = NULL;
