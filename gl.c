@@ -2,13 +2,14 @@
  * @file gl.c
  * @brief Calls to SDL to setup bitmap to draw graphics of Game of Life
  * @details Originally contained calls to sdl_test for help with setup of SDL.
- * Currently contains calls to SDL to setop bitmap to draw graphics of Game
+ * Currently contains calls to SDL to setup bitmap to draw graphics of Game
  * of Life. Also, contains exit from program, main function, and initialization
  * for life.c functions.
  * @author Benjamin Wilson
  * @date Fall 2021
- * @todo Life initialization, free() calls for arrays, and function calls.
- * @bug none
+ * @todo Extra Credit for multiple patterns
+ * @bug oh, I wouldn't doubt it, but it seems fine to me. A little wierd at 0,0
+ * @remarks Works for both 1.06 and 1.05 file format for extra credit.
  */
 
 #include <stdlib.h>
@@ -23,7 +24,7 @@ int main(int argc, char *argv[])
 	int height = 720;
 	int sprite_size = 8; /* either 2, 4, 8, or 16 */
 	
-	/*
+	/**
 	 * int m = -66;
 	 * int n = -10;
 	 */
@@ -36,12 +37,12 @@ int main(int argc, char *argv[])
 	
 	/* Command line arguments and additional values needed for life.c functions */
 	int c; /* Used for command line arguments */
-	FILE *fp_106 = NULL; /* file pattern */
+	FILE *fp_106 = NULL; /* file pattern for 106.lif */
 	FILE *fp_105 = NULL; /* file pattern for 105.lif */
-	int x_o_106 = 45; /* Initial x-cord of pattern */
-	int y_o_106 = 45; /* Initial y-cord of pattern */
-	int x_o_105 = 0; /* Initial x-cord of pattern for 105.lif */
-	int y_o_105 = 0; /* Initial y-cord of pattern for 105.lif */
+	int x_o_106 = 30; /* Initial x-cord of pattern for 106.lif */
+	int y_o_106 = 30; /* Initial y-cord of pattern for 106.lif */
+	int x_o_105 = 0; /* Initial x-cord of pattern for 105.lif based on center of window */
+	int y_o_105 = 0; /* Initial y-cord of pattern for 105.lif based on center of window */
 	char edge = 't'; /* Edge behavior of simulation */
 	int cmp; /* Used for command line arguments/comparisons */
 	char *find = NULL;
@@ -49,15 +50,15 @@ int main(int argc, char *argv[])
 	int call_105 = 0;
 	char cord[LEN]; /* Used for holding temp cord values in command line arguments */
 	int argtmp = -1; /* Integer storage of optarg */
-		int i, j; /* Iteration variable */
+		int i, j; /* Iteration variables */
         
     /* set up SDL -- works with SDL2 */
-	/*
+	/**
 	 * Note to self: don't put this in the while loop, it opens individual
 	 * windows, learned the hard way
 	 */
 
-	/* Command line stuff here */
+	/* Usage information */
 	if(argc == 1) 
 	{
 		/* Prints out usage */
@@ -141,8 +142,19 @@ int main(int argc, char *argv[])
 		
 		/* Sprite size */
 		case 's':
-			/* Creates tmp int */
-			argtmp = atoi(optarg);
+			/* Error checks for decimals */
+			for(i = 0; optarg[i] != '\0'; i++)
+				if(optarg[i] == '.')
+					cmp = 1;
+			
+			/* Creates tmp int or exits argument after error check */
+			if(cmp == 0)
+				argtmp = atoi(optarg);
+			else
+			{
+				printf("%s: argument to option -s has failed. Sprite size must be 2, 4, 8, or 16. Only integers.\n", argv[0]);
+				break;
+			}
 
 			/* Error checks and sets sprite size if valid */
 			if(argtmp == 2 || argtmp == 4 || argtmp == 8 || argtmp == 16)
@@ -154,11 +166,12 @@ int main(int argc, char *argv[])
 			}
 			break;
 		
-		/* Filename or path */
+		/* Filename or path for 1.06 files */
 		case 'f':
-			/* Tests for correct file format */
+			/* Documents that -f was argued */
 			call_106 = 1;
 
+			/* Error checks for proper file format */
 			find = strstr(optarg, "105");
 
 			/* Opens the 1.06 life file */
@@ -223,7 +236,7 @@ int main(int argc, char *argv[])
 
 			/* Defaults if improper file format */
 			if(fp_105 == NULL)
-				printf("%s: argument to option '-Q' failed. Filename must contain file 1.05 format and '-f' must not be argued.\n", argv[0]);
+				printf("%s: argument to option '-Q' failed. Filename must contain file 1.05 format and '-f' must not be argued or must have failed.\n", argv[0]);
 
 			break;
 		
@@ -296,7 +309,7 @@ int main(int argc, char *argv[])
 		
 		/* Help option for figuring out argument and command format */
 		case 'H':
-			printf("Usage: life -w width -h height -r red -g green -b blue -s sprite -f filename -o coordinates -e edge\n");
+			printf("Usage: life -w width -h height -r red -g green -b blue -s size -f filename_106 -o coordinates_106 -Q filename_105 -q filename_105 -e edge\n");
 			printf("w: Screen Width of simulation in pixels. Must be larger than 0. Default of 1280p\n");
 			printf("h: Screen height of simlation in pixels. Must be larger than 0. Default of 720p\n");
 			printf("r: RGB value (0-255) of red coloring of cells. Default of 140\n");
@@ -304,7 +317,7 @@ int main(int argc, char *argv[])
 			printf("b: RGB value (0-255) of blue coloring of cells. Default of 0\n");
 			printf("s: Size of the sprite. Valid values are 2, 4, 8, or 16 only. Must be an integer. Default of 8p\n");
 			printf("f: Filename and path of initial life pattern in file format 1.06. Default ./patterns/glider_106.lif\n");
-			printf("o: Initial (x,y) cooradinates of the initial pattern for 1.06 files on the screen in pixels without spaces and with wrapping. Default of 45,45 with respect to the top left of the window\n");
+			printf("o: Initial (x,y) cooradinates of the initial pattern for 1.06 files on the screen in pixels without spaces and with wrapping. Default of 30,30 with respect to the top left of the window\n");
 			printf("Q: Filename and path of initial life pattern in file format 1.05. Default ./patterns/glider_105.lif\n");
 			printf("q: Initial (x,y) cooradinates of the initial pattern for 1.05 files on the screen in pixels without spaces and with wrapping. Default of 0,0 with respect to the center of the window\n");
 			printf("e: Edge of life simulation. Valid options are \"hedge\", \"torus\", or \"klein\". Default of torus\n");
@@ -351,6 +364,7 @@ int main(int argc, char *argv[])
 	/* Default file pattern in case no command is passed or 106 fails after being argued */
 	if((fp_106 == NULL && fp_105 == NULL && find == NULL && call_105 == 0 && call_106 == 0) || (call_106 == 1 && fp_106 == NULL))
 	{
+		/* Opens default pattern file */
 		fp_106 = fopen("./patterns/glider_106.lif", "r");
 		
 		/* Initial pattern reading from text files */
@@ -371,6 +385,7 @@ int main(int argc, char *argv[])
 	/* Default file pattern in case -Q command is passed but fails for some reason */
 	} else if(fp_105 == NULL && call_105 == 1)
 	{
+		/* Opens default pattern file */
 		fp_105 = fopen("./patterns/glider_105.lif", "r");
 
 		/* Initial pattern reading from text files */
@@ -408,6 +423,7 @@ int main(int argc, char *argv[])
 		/* Renders gen_A if current gen number is divisble by 2 */
 		if(gen % 2 == 0)
 		{
+			/* Delays game rendering */
 			if (SDL_GetTicks() % 50 == 0)
 			{
 
@@ -433,6 +449,7 @@ int main(int argc, char *argv[])
 		/* Renders gen_B if current gen number is NOT divisible by 2 */
 		} else if(gen % 2 != 0)
 		{
+			/* Delays game rendering */
 			if (SDL_GetTicks() % 50 == 0)
 			{
 
@@ -457,11 +474,11 @@ int main(int argc, char *argv[])
 		}
 
 
-		/* change the  modulus value to slow the rendering */
-		/*
-			if (SDL_GetTicks() % 1 == 0)
-			sdl_test(&sdl_info, m, n);
-		*/
+		/* change the  modulus value to slow the rendering of sdl test */
+		/**
+		 * if (SDL_GetTicks() % 1 == 0)
+		 * sdl_test(&sdl_info, m, n);
+		 */
 
     	/* Poll for events, and handle the ones we care about. 
          * You can click the X button to close the window
