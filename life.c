@@ -229,12 +229,19 @@ unsigned char **next_gen_torus(unsigned char **matrix, int row, int col)
     for(i = 1; i < row + 1; i++)
         tmp[i][j] = matrix[i - 1][0];
 
+    /* Wraps corner cells (literally just the one cell into opposing corner) of current cell pattern into corners of tmp */
+    tmp[row + 1][col + 1] = matrix[0][0];
+    tmp[0][col + 1] = matrix[row - 1][0];
+    tmp[row + 1][0] = matrix[0][col - 1];
+    tmp[0][0] = matrix[row - 1][col - 1];
+
     /* Places current cell pattern into tmp_mat */
     for(i = 0; i < row; i++)
     {
         for(j = 0; j < col; j++)
             tmp_mat[i][j] = matrix[i][j];
     }
+
 
     /* Used for debugging */
     //print_matrix(tmp_mat, row, col);
@@ -260,6 +267,7 @@ unsigned char **next_gen_torus(unsigned char **matrix, int row, int col)
                         count--;
                 }
             }
+
 
             /* GOL rule 4 */
             if(tmp[i][j] == 0 && count == 3)
@@ -339,6 +347,12 @@ unsigned char **next_gen_klein(unsigned char **matrix, int row, int col)
     j = col + 1;
     for(i = 1; i < row + 1; i++)
         tmp[i][j] = matrix[i - 1][0];
+
+    /* Wraps corner cells (literally just the one cell into opposing corner) of current cell pattern into corners of tmp */
+    tmp[row + 1][col + 1] = matrix[0][0];
+    tmp[0][col + 1] = matrix[row - 1][0];
+    tmp[row + 1][0] = matrix[0][col - 1];
+    tmp[0][0] = matrix[row - 1][col - 1];
 
     /* Places current cell pattern into tmp_mat */
     for(i = 0; i < row; i++)
