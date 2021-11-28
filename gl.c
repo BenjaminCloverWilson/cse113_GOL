@@ -8,7 +8,14 @@
  * @author Benjamin Wilson
  * @date Fall 2021
  * @todo Extra Credit for multiple patterns
- * @bug oh, I wouldn't doubt it, but it seems fine to me. A little wierd at 0,0
+ * @bug oh, I wouldn't doubt it, but it seg faults with certain initial cords, 
+ * file formats, and patterns. I'm not exactly sure why because these occur
+ * rarely and inconsistently. Like, it will work 50 times, then suddenly stop
+ * working for any future runs. So, if it does occur, try a differnt cord, file
+ * format, or pattern, and it should be fine if you come back later or recompile.
+ * It just makes no sense why it does that sometimes. Otherwise, the program works
+ * as I assume it's supposed to. The 1.06 and 1.05 patterns are rotated 90 degrees
+ * from each other, but I assume that's fine.
  * @remarks Works for both 1.06 and 1.05 file format for extra credit.
  */
 
@@ -22,12 +29,10 @@ int main(int argc, char *argv[])
 	/* Screen width and height and spite size all in pixels */
 	int width = 1280;
 	int height = 720;
-	int sprite_size = 8; /* either 2, 4, 8, or 16 */
-	
-	/**
-	 * int m = -66;
-	 * int n = -10;
-	 */
+	int sprite_size = 4; /* either 2, 4, 8, or 16 */
+
+	 //int m = -66;
+	 //int n = -10;
     
 	/* colors are RGB model valid values [0, 255] */
 	unsigned char red = 140;
@@ -48,6 +53,8 @@ int main(int argc, char *argv[])
 	char *find = NULL;
 	int call_106 = 0;
 	int call_105 = 0;
+	int call_q = 0;
+	int call_o = 0;
 	char cord[LEN]; /* Used for holding temp cord values in command line arguments */
 	int argtmp = -1; /* Integer storage of optarg */
 		int i, j; /* Iteration variables */
@@ -76,11 +83,11 @@ int main(int argc, char *argv[])
 			argtmp = atoi(optarg);
 
 			/* Error Checks and sets width if valid */
-			if(argtmp > 0)
+			if(argtmp > 199)
 				width = argtmp;
 			else
 			{
-				printf("%s: argument to option -w failed. Window width must be larger than 0.\n", argv[0]);
+				printf("%s: argument to option -w failed. Window width must be larger than 199 pixels.\n", argv[0]);
 			}
 			break;
 		
@@ -90,11 +97,11 @@ int main(int argc, char *argv[])
 			argtmp = atoi(optarg);
 
 			/* Error checks and sets height if valid */
-			if(argtmp > 0)
+			if(argtmp > 199)
 				height = argtmp;
 			else
 			{
-				printf("%s: argument to option -h has failed. Window height must be larger than 0.\n", argv[0]);
+				printf("%s: argument to option -h has failed. Window height must be larger than 199 pixels.\n", argv[0]);
 			}
 			break;
 		
@@ -186,6 +193,9 @@ int main(int argc, char *argv[])
 
 		/* Initial x,y coordinates of 1.06 initial pattern */
 		case 'o':
+			/* Call tracker */
+			call_o = 1;
+
 			/* Sets tmp int and first assigns x_o_106 value */
 			argtmp = atoi(optarg);
 				x_o_106 = argtmp;
@@ -242,6 +252,9 @@ int main(int argc, char *argv[])
 		
 		/* Initial x,y coordinates of 1.05 initial pattern */
 		case 'q':
+			/* Call tracker */
+			call_q = 1;
+
 			/* Sets tmp int and first assigns x_o_105 value */
 			argtmp = atoi(optarg);
 				x_o_105 = argtmp;
@@ -311,21 +324,22 @@ int main(int argc, char *argv[])
 		case 'H':
 			printf("Usage: life -w width -h height -r red -g green -b blue -s size -f filename_106 -o coordinates_106 -Q filename_105 -q filename_105 -e edge\n");
 			printf("w: Screen Width of simulation in pixels. Must be larger than 0. Default of 1280p\n");
-			printf("h: Screen height of simlation in pixels. Must be larger than 0. Default of 720p\n");
+			printf("h: Screen height of simulation in pixels. Must be larger than 0. Default of 720p\n");
 			printf("r: RGB value (0-255) of red coloring of cells. Default of 140\n");
 			printf("g: RGB value (0-255) of green coloring of cells. Default of 145\n");
 			printf("b: RGB value (0-255) of blue coloring of cells. Default of 0\n");
-			printf("s: Size of the sprite. Valid values are 2, 4, 8, or 16 only. Must be an integer. Default of 8p\n");
+			printf("s: Size of the sprite. Valid values are 2, 4, 8, or 16 only. Must be an integer. Default of 4p\n");
 			printf("f: Filename and path of initial life pattern in file format 1.06. Default ./patterns/glider_106.lif\n");
-			printf("o: Initial (x,y) cooradinates of the initial pattern for 1.06 files on the screen in pixels without spaces and with wrapping. Default of 30,30 with respect to the top left of the window\n");
+			printf("o: Initial (x,y) coordinates of the initial pattern for 1.06 files on the screen in pixels without spaces and with wrapping. Default of 30,30 with respect to the top left of the window\n");
 			printf("Q: Filename and path of initial life pattern in file format 1.05. Default ./patterns/glider_105.lif\n");
-			printf("q: Initial (x,y) cooradinates of the initial pattern for 1.05 files on the screen in pixels without spaces and with wrapping. Default of 0,0 with respect to the center of the window\n");
+			printf("q: Initial (x,y) coordinates of the initial pattern for 1.05 files on the screen in pixels without spaces and with wrapping. Default of 0,0 with respect to the center of the window\n");
 			printf("e: Edge of life simulation. Valid options are \"hedge\", \"torus\", or \"klein\". Default of torus\n");
 			printf("NOTE: Invalid arguments are noted in the terminal and the program is run with the default value instead\n");
-			printf("NOTE 2: Default of filename is based on provided path to created patterns folder, ./patterns/filename.\n");
+			printf("NOTE 2: Default of filename is based on provided path to created patterns folder: ./patterns/filename.\n");
 			printf("The filename must be provided via a relative file path if the .lif file is not in the same directory as gl.c\n");
-			printf("Note 3: Leaving an argument blank, then attempting a second argument results in a default value\n");
-			printf("Note 4: If both '-f' and '-Q' are argued, -f will be prioritized. '-Q' will only be run if '-f' is not called or if '-f' fails and '-Q' was argued as well\n");
+			printf("NOTE 3: Leaving an argument blank, then attempting a second argument results in a default value\n");
+			printf("NOTE 4: If both '-f' and '-Q' are argued, -f will be prioritized. '-Q' will only be run if '-f' is not called or if '-f' fails and '-Q' was argued as well\n");
+			printf("NOTE 5: If the same argument is run more than once, the last value of the argument will be accepted.\n");
 			exit(EXIT_SUCCESS);
 			break;
 		
@@ -367,6 +381,10 @@ int main(int argc, char *argv[])
 		/* Opens default pattern file */
 		fp_106 = fopen("./patterns/glider_106.lif", "r");
 		
+		/* Error checks cord calls on command line */
+		if(call_q == 1 && fp_106 != NULL)
+			printf("%s: argument to option '-q' failed. Argument has no effect as '-Q' failed while '-f' was called, or was not called itself.\n", argv[0]);
+
 		/* Initial pattern reading from text files */
 		gen_A = pattern_106(fp_106, cell_w, cell_h, x_o_106, y_o_106);
 		
@@ -376,6 +394,10 @@ int main(int argc, char *argv[])
 	/* Opens file pattern argued if -f is called in command line */
 	} else if(call_106 == 1 && fp_106 != NULL)
 	{
+		/* Error checks cord calls on command line */
+		if(call_q == 1)
+			printf("%s: argument to option '-q' failed. Argument has no effect as '-f' was argued successfully.\n", argv[0]);
+
 		/* Initial pattern reading from text files */
 		gen_A = pattern_106(fp_106, cell_w, cell_h, x_o_106, y_o_106);
 		
@@ -388,6 +410,10 @@ int main(int argc, char *argv[])
 		/* Opens default pattern file */
 		fp_105 = fopen("./patterns/glider_105.lif", "r");
 
+		/* Error checks cord calls on command line */
+		if(call_o == 1 && fp_105 != NULL)
+			printf("%s: argument to option '-o' failed. Argument has no effect as '-f' failed or was not called while '-Q' was argued.\n", argv[0]);
+
 		/* Initial pattern reading from text files */
 		gen_A = pattern_105(fp_105, cell_w, cell_h, x_o_105, y_o_105);
 		
@@ -397,6 +423,10 @@ int main(int argc, char *argv[])
 	/* Opens file pattern argued if -Q is called in command line */
 	} else if(call_105 == 1 && fp_105 != NULL)
 	{
+		/* Error checks cord calls on command line */
+		if(call_o == 1)
+			printf("%s: argument to option '-o' failed. Argument has no effect as '-Q' was argued successfully.\n", argv[0]);
+
 		/* Initial pattern reading from text files */
 		gen_A = pattern_105(fp_105, cell_w, cell_h, x_o_105, y_o_105);
 		
@@ -410,11 +440,9 @@ int main(int argc, char *argv[])
 	track = gen_B;
 
 	/* Print matrix in terminal for seeing what they are for debugging */
-	/**
-	 * print_matrix(gen_A, cell_w, cell_h);
-	 * printf("\n");
-	 * print_matrix(gen_B, cell_w, cell_h);
-	 */
+	 //print_matrix(gen_A, cell_w, cell_h);
+	 //printf("\n");
+	 //print_matrix(gen_B, cell_w, cell_h);
 
     /* Main loop: loop forever. */
 	while (1)
@@ -424,7 +452,7 @@ int main(int argc, char *argv[])
 		if(gen % 2 == 0)
 		{
 			/* Delays game rendering */
-			if (SDL_GetTicks() % 50 == 0)
+			if (SDL_GetTicks() % 25 == 0)
 			{
 
 				/* Render game of life current gen */
@@ -450,7 +478,7 @@ int main(int argc, char *argv[])
 		} else if(gen % 2 != 0)
 		{
 			/* Delays game rendering */
-			if (SDL_GetTicks() % 50 == 0)
+			if (SDL_GetTicks() % 25 == 0)
 			{
 
 				/* Render game of life current gen */
@@ -475,10 +503,8 @@ int main(int argc, char *argv[])
 
 
 		/* change the  modulus value to slow the rendering of sdl test */
-		/**
-		 * if (SDL_GetTicks() % 1 == 0)
-		 * sdl_test(&sdl_info, m, n);
-		 */
+		 //if (SDL_GetTicks() % 1 == 0)
+		 //sdl_test(&sdl_info, m, n);
 
     	/* Poll for events, and handle the ones we care about. 
          * You can click the X button to close the window
