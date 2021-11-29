@@ -55,15 +55,12 @@ int main(int argc, char *argv[])
 	int call_105 = 0;
 	int call_q = 0;
 	int call_o = 0;
+	int comma = 0;
 	char cord[LEN]; /* Used for holding temp cord values in command line arguments */
 	int argtmp = -1; /* Integer storage of optarg */
 		int i, j; /* Iteration variables */
         
     /* set up SDL -- works with SDL2 */
-	/**
-	 * Note to self: don't put this in the while loop, it opens individual
-	 * windows, learned the hard way
-	 */
 
 	/* Usage information */
 	if(argc == 1) 
@@ -187,7 +184,11 @@ int main(int argc, char *argv[])
 
 			/* Defaults if improper file format */
 			if(fp_106 == NULL)
-				printf("%s: argument to option '-f' failed. Filename must contain file 1.06 format and no argument to '-Q' can be made\n", argv[0]);
+			{
+				/* Printf split for display purposes */
+				printf("%s: argument to option '-f' failed. Filename must contain file 1.06 format and no argument to '-Q' can be made. ", argv[0]);
+				printf("If file is not located in the same folder as gl.c, the path to the pattern file must be specified.\n");
+			}
 
 			break;
 
@@ -205,6 +206,8 @@ int main(int argc, char *argv[])
 			{
 				if(*(optarg + i) == ',')
 				{
+					comma = 1;
+
 					i++;
 					if(*(optarg + i) == '\0')
 					{
@@ -229,6 +232,14 @@ int main(int argc, char *argv[])
 					break;
 				}
 			}	
+
+			/* Error CHeck */
+			if(comma == 0)
+			{
+				printf("%s: argument to option '-o' failed. Coordinate must contain no spaces and be in format (x,y).\n", argv[0]);
+				x_o_106 = 30;
+			}
+
 			break;
 		
 		/* Filename or path of a 1.05 file */
@@ -264,6 +275,8 @@ int main(int argc, char *argv[])
 			{
 				if(*(optarg + i) == ',')
 				{
+					comma = 1;
+
 					i++;
 					if(*(optarg + i) == '\0')
 					{
@@ -288,6 +301,14 @@ int main(int argc, char *argv[])
 					break;
 				}
 			}
+
+			/* Error CHeck */
+			if(comma == 0)
+			{
+				printf("%s: argument to option '-o' failed. Coordinate must contain no spaces and be in format (x,y).\n", argv[0]);
+				x_o_105 = 0;
+			}
+
 			break;
 
 		/* Edge behavior */
